@@ -12,15 +12,20 @@ jobs:
   build-release:
     name: "Build and Release"
     runs-on: "ubuntu-22.04"
+    
+    # --- 关键修改点：添加权限声明 ---
+    permissions:
+      contents: write
+    # ----------------------------
 
     steps:
       - name: "Checking out git repository"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4 # 建议升级到 v4
 
       - name: Set executable permissions
         run: |
-          chmod +x "${{ github.workspace }}/custom.sh"
-          chmod +x "${{ github.workspace }}/supportFiles/custom/build.sh"
+          chmod +x "./custom.sh"
+          chmod +x "./supportFiles/custom/build.sh"
 
       - name: Validate Download URL
         run: |
@@ -44,10 +49,11 @@ jobs:
           ./custom.sh "$download_url"
 
       - name: "Publish"
-        uses: softprops/action-gh-release@v2.2.1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: "Custom-Installer-x86_64-ISO"
           body_path: "${{ github.workspace }}/supportFiles/custom/info.md"
           files: |
             output/custom-installer-x86_64.iso
-          token: "${{ secrets.GITHUB_TOKEN }}"
+          # 提示：在这里也可以不写 token，action 会默认尝试使用内置 token
+          token: ${{ secrets.GITHUB_TOKEN }}
